@@ -1,0 +1,3 @@
+#table {
+  overflow-y: var(--vaadin-grid-overflow-y, auto);
+}

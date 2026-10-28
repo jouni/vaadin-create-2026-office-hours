@@ -1,0 +1,313 @@
+.people-view {
+  min-height: 100%;
+
+  --_detail-size: 30rem;
+
+  .view-header {
+    padding: 0;
+    padding-bottom: var(--vaadin-gap-xl);
+  }
+}
+
+@media (width < 600px) {
+  .people-view {
+    --_detail-size: 100%;
+    --_master-size: 100%;
+
+    &::part(master) {
+      transition: translate 300ms, opacity 300ms linear;
+    }
+  }
+
+  .people-view[has-detail]:not([transition="remove"])::part(master) {
+    translate: -60px;
+    opacity: 0;
+  }
+}
+
+vaadin-master-detail-layout.people-view {
+  height: 100%;
+}
+
+.people-content {
+  --vaadin-scroller-padding-inline: var(--view-padding);
+  --vaadin-scroller-padding-block: var(--view-padding);
+  padding-bottom: 0;
+  flex: 1;
+  min-height: 0;
+
+  &[overflow~="bottom"] {
+    --vaadin-grid-overflow-y: hidden;
+  }
+
+  &:not([overflow~="bottom"]) {
+    scrollbar-width: none;
+  }
+}
+
+vaadin-horizontal-layout.people-heading {
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.people-heading h1 {
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.people-heading p,
+.directory-header p {
+  color: var(--people-muted);
+  margin: 8px 0 0;
+}
+
+vaadin-flex-layout.metric-grid {
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+vaadin-card.metric-card {
+  --vaadin-card-background: var(--people-surface);
+  --vaadin-card-border-color: var(--people-line);
+  --vaadin-card-border-radius: 16px;
+  --vaadin-card-gap: 0;
+  --vaadin-card-padding: 20px;
+  box-sizing: border-box;
+  flex: 1 1 220px;
+  min-height: 152px;
+}
+
+.metric-card::part(header) {
+  margin-bottom: 22px;
+}
+
+.metric-card-header {
+  gap: 12px;
+}
+
+.metric-label {
+  color: #58625b;
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+vaadin-badge.metric-icon {
+  --vaadin-badge-border-radius: 10px;
+  --vaadin-badge-padding: 8px;
+}
+
+.metric-icon-svg {
+  height: 18px;
+  width: 18px;
+}
+
+vaadin-badge.metric-icon.blue { --vaadin-badge-background: #e5efff; --vaadin-badge-text-color: #356eb8; }
+vaadin-badge.metric-icon.violet { --vaadin-badge-background: #eee9ff; --vaadin-badge-text-color: #7557be; }
+vaadin-badge.metric-icon.amber { --vaadin-badge-background: #fff1d8; --vaadin-badge-text-color: #9a6720; }
+vaadin-badge.metric-icon.mint { --vaadin-badge-background: #dff5e9; --vaadin-badge-text-color: #287951; }
+
+.metric-value {
+  display: block;
+  font-size: 1.85rem;
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.metric-detail {
+  color: var(--people-muted);
+  display: block;
+  font-size: 0.8rem;
+}
+
+vaadin-card.directory-card {
+  --vaadin-card-background: var(--people-surface);
+  --vaadin-card-border-color: var(--people-line);
+  --vaadin-card-border-radius: 16px;
+  --vaadin-card-gap: 0;
+  --vaadin-card-padding: 0;
+  box-shadow: 0 3px 16px rgb(30 52 36 / 4%);
+  overflow: hidden;
+  width: 100%;
+}
+
+.directory-card::part(header) {
+  padding: 24px 26px 20px;
+}
+
+.directory-card::part(content) {
+  overflow: hidden;
+}
+
+.directory-card::part(footer) {
+  border-top: 1px solid var(--people-line);
+  padding: 14px 26px;
+}
+
+vaadin-horizontal-layout.directory-header {
+  gap: 24px;
+}
+
+.directory-header h2 {
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.directory-title-line {
+  gap: 10px;
+}
+
+.directory-header {
+  padding-block: var(--vaadin-padding-xl);
+}
+
+vaadin-flex-layout.people-filters {
+  align-items: center;
+  gap: 10px;
+}
+
+.people-search {
+  width: min(290px, 100%);
+}
+
+.filter-bar {
+  padding-bottom: var(--vaadin-padding-xl);
+}
+
+.filter-select {
+  min-width: 145px;
+}
+
+.clear-action {
+  background: transparent;
+  flex: 0 0 auto;
+}
+
+vaadin-grid.people-grid {
+  width: calc(100% + var(--view-padding) * 2);
+  max-width: calc(100% + var(--view-padding) * 2);
+  margin-inline: calc(var(--view-padding) * -1);
+  min-height: calc(100% + var(--view-padding));
+
+  &::part(first-column-cell) {
+    padding-inline-start: calc(var(--view-padding) - var(--vaadin-padding-inline-container));
+  }
+
+  &::part(last-column-cell) {
+    padding-inline-end: calc(var(--view-padding) - var(--vaadin-padding-inline-container));
+  }
+}
+
+.people-grid::part(header-cell) {
+}
+
+.people-grid::part(body-cell) {
+  min-height: 74px;
+}
+
+.people-grid::part(row):hover {
+  background: #fafcfa;
+}
+
+vaadin-horizontal-layout.person-cell {
+  gap: 12px;
+  min-width: 0;
+}
+
+.person-identity {
+  gap: 3px;
+  min-width: 0;
+}
+
+.person-name {
+  font-weight: 680;
+}
+
+.person-email {
+  color: var(--people-muted);
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+vaadin-horizontal-layout.location-cell {
+  color: #556058;
+  gap: 7px;
+}
+
+.location-cell vaadin-icon {
+  color: #89918b;
+  height: 15px;
+  width: 15px;
+}
+
+vaadin-badge.status-badge {
+  --vaadin-badge-font-weight: 650;
+}
+
+.row-menu {
+  background: transparent;
+  color: #7a837c;
+  min-width: 32px;
+  padding: 0;
+}
+
+vaadin-horizontal-layout.table-footer {
+  color: var(--people-muted);
+  font-size: 0.78rem;
+}
+
+.pagination-buttons {
+  gap: 6px;
+}
+
+.pagination-buttons vaadin-button {
+  min-height: 32px;
+}
+
+vaadin-vertical-layout.person-detail-view {
+  box-sizing: border-box;
+  gap: var(--vaadin-gap-l);
+  overflow: auto;
+  padding: var(--vaadin-padding-l);
+}
+
+.person-detail-toolbar {
+  flex: 0 0 auto;
+}
+
+.person-detail-title,
+.person-detail-identity h2 {
+  margin: 0;
+}
+
+.person-detail-identity {
+  gap: var(--vaadin-gap-m);
+}
+
+.person-detail-identity-copy {
+  gap: var(--vaadin-gap-xs);
+  min-width: 0;
+}
+
+.person-detail-identity-copy p {
+  color: var(--vaadin-text-color-secondary);
+  margin: 0 0 var(--vaadin-gap-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+vaadin-card.person-detail-card {
+  --vaadin-card-padding: var(--vaadin-padding-l);
+}
+
+.person-detail-actions {
+  margin-top: auto;
+}

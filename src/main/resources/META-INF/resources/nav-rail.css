@@ -1,0 +1,51 @@
+vaadin-app-layout {
+  --vaadin-app-layout-drawer-width: 14rem;
+
+  &:not([overlay])::part(drawer) {
+    transition: width 0.3s;
+  }
+
+  .app-name {
+    transition: opacity 0.3s;
+  }
+
+  vaadin-side-nav-item::part(link) {
+    transition: color 0.3s;
+  }
+
+  vaadin-side-nav-item > vaadin-icon {
+    color: var(--vaadin-text-color-secondary);
+  }
+
+  vaadin-side-nav-item[current] > vaadin-icon {
+    color: var(--aura-accent-contrast-color);
+  }
+}
+
+.nav-rail:not([overlay]) {
+  --vaadin-app-layout-drawer-width: calc(
+    max(0px,var(--aura-app-layout-inset) - var(--vaadin-padding-s)) * 2 +
+    var(--vaadin-scroller-padding-inline, var(--vaadin-padding-m)) * 2 +
+    var(--vaadin-side-nav-item-border-width, 1px) * 2 +
+    var(--vaadin-padding-m) * 2 +
+    var(--vaadin-icon-size, 1lh)
+  );
+
+  .app-name {
+    opacity: 0;
+  }
+
+  vaadin-side-nav-item::part(link) {
+    color: transparent;
+  }
+}
+
+.rail-nav-toggle {
+  align-self: start;
+  margin-inline: var(--vaadin-scroller-padding-inline, var(--vaadin-padding-m));
+  padding: var(--vaadin-side-nav-item-padding);
+}
+
+vaadin-app-layout[overlay] .rail-nav-toggle {
+  display: none;
+}

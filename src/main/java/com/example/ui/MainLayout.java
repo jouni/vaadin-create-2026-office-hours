@@ -1,27 +1,44 @@
 package com.example.ui;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.*;
+import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.component.shared.Tooltip.AriaLinkMode;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.sidenav.SideNavVariant;
 import com.vaadin.flow.router.Layout;
-import com.vaadin.flow.server.menu.MenuConfiguration;
-import com.vaadin.flow.server.menu.MenuEntry;
 
 @Layout
 public final class MainLayout extends AppLayout {
 
     MainLayout() {
         setPrimarySection(Section.DRAWER);
-        addToDrawer(createApplicationHeader(), createApplicationDrawer());
+        addToDrawer(createApplicationHeader(), createApplicationDrawer(), createRailNavToggle());
+        UI.getCurrentOrThrow().addClassName("aura-accent-neutral");
+    }
+
+    private Component createRailNavToggle() {
+        var toggle = new Button(LucideIcon.PANEL_LEFT.create());
+        toggle.addThemeVariants(ButtonVariant.TERTIARY);
+        toggle.addClassName("rail-nav-toggle");
+        toggle.setAriaLabel("Toggle sidebar");
+        Tooltip.forComponent(toggle).withText("Toggle sidebar").withAriaLinkMode(AriaLinkMode.NONE);
+        toggle.addClickListener(e -> {
+            if (this.getClassNames().contains("nav-rail")) {
+                this.removeClassName("nav-rail");
+            } else {
+                this.addClassName("nav-rail");
+            }
+        });
+        return toggle;
     }
 
     private Component createApplicationHeader() {
@@ -36,6 +53,7 @@ public final class MainLayout extends AppLayout {
         var header = new HorizontalLayout(appLogo, appName);
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.setPadding(true);
+        header.addClassName("app-header");
         return header;
     }
 
@@ -47,6 +65,7 @@ public final class MainLayout extends AppLayout {
 
     private SideNav createPrimaryNavigation() {
         var nav = new SideNav();
+        nav.addThemeVariants(SideNavVariant.AURA_FILLED);
         nav.addItem(
                 item("Home", "", LucideIcon.HOUSE),
                 item("People", "people", LucideIcon.USERS),

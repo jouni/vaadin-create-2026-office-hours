@@ -1,8 +1,24 @@
+@import "./nav-rail.css";
+@import "./people-view.css";
+
+html {
+    --vaadin-side-nav-item-padding: var(--vaadin-padding-s) var(--vaadin-padding-m);
+    color-scheme: dark;
+    --aura-content-color-scheme: light dark;
+    --view-padding: var(--vaadin-padding-xl);
+}
+
 .app-logo {
     border-radius: min(40%, var(--vaadin-radius-m));
     margin-inline-start: var(--vaadin-padding-inline-container);
 }
 
 .app-name {
+    white-space: nowrap;
     font-weight: var(--aura-font-weight-semibold);
     font-size: var(--aura-font-size-l);
+}
+
+.app-header {
+    overflow: hidden;
+}

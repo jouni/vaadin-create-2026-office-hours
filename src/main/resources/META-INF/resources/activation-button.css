@@ -1,0 +1,315 @@
+/* =====================================================================
+   Activation button — a <vaadin-button> with an animated, state-driven
+   icon and a rolling label.
+
+   STATE
+     --state: resting | hovered | working | done
+     Hover and keyboard focus set "hovered" automatically. Set
+     "working" / "done" as an inline style from your code.
+
+   MARKUP
+     <vaadin-button class="activation-button">
+       <span slot="prefix" class="ab-icon-…">…svg…</span>      any icon
+       <span class="ab-labels">
+         <span>Export</span>                                   resting
+         <span>Exporting…</span>                                working
+         <span>Exported</span>                                  done
+       </span>
+       <span slot="suffix" class="ab-fill"></span>              surface
+     </vaadin-button>
+
+   LOOK  (override on the button, or in a modifier class)
+     --ab-bg / --ab-hover-bg / --ab-done-bg        surface
+     --ab-fg / --ab-done-fg                        text + icon colour
+     --ab-border / --ab-done-border                1px outline
+     --ab-shadow / --ab-done-shadow                elevation
+     --ab-height --ab-padding --ab-gap --ab-radius
+     --ab-font-family --ab-font-size --ab-font-weight
+     --ab-row                                      label row height
+     --ab-label-align                              flex-start | center
+
+   ICONS
+     An icon is any element in slot="prefix". It inherits --state and
+     animates itself with @container style(--state: …). Two are below:
+     .ab-icon-activate and .ab-icon-export. A plain icon works too; it
+     just won't animate.
+   ===================================================================== */
+
+@property --state {
+  syntax: "resting | hovered | working | done";
+  inherits: true;
+  initial-value: resting;
+}
+
+vaadin-button.activation-button {
+  /* Default look: a quiet secondary button */
+  --ab-bg: #fafafa;
+  --ab-hover-bg: #f1f1f3;
+  --ab-fg: #1f1f24;
+  --ab-border: #d9d9de;
+  --ab-shadow: 0 1px 2px rgb(16 16 24 / .05);
+  --ab-done-bg: #effbf3;
+  --ab-done-fg: #137a3a;
+  --ab-done-border: #a8e2bc;
+  --ab-done-shadow: 0 1px 2px rgb(16 16 24 / .05);
+
+  --ab-height: 36px;
+  --ab-padding: 0 14px 0 10px;
+  --ab-gap: 8px;
+  --ab-radius: 9px;
+  --ab-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ab-font-size: 15px;
+  --ab-font-weight: 450;
+  --ab-row: 24px;
+
+  --ab-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ab-smooth: cubic-bezier(.65, 0, .35, 1);
+
+  /* Map onto Vaadin's button properties */
+  --vaadin-button-background: transparent;          /* .ab-fill paints it */
+  --vaadin-button-border-width: 0px;
+  --vaadin-button-height: var(--ab-height);
+  --vaadin-button-padding: var(--ab-padding);
+  --vaadin-button-gap: 0 var(--ab-gap);
+  --vaadin-button-border-radius: var(--ab-radius);
+  --vaadin-button-font-family: var(--ab-font-family);
+  --vaadin-button-font-size: var(--ab-font-size);
+  --vaadin-button-font-weight: var(--ab-font-weight);
+  --vaadin-button-label-wrap: nowrap;
+
+  --state: resting;
+  position: relative;
+  isolation: isolate;
+  transition: scale .35s var(--ab-spring);
+}
+vaadin-button.activation-button:is(:hover, [focus-ring]) { --state: hovered; }
+vaadin-button.activation-button[active] { scale: .96; transition-duration: .12s; }
+vaadin-button.activation-button::part(label) { overflow: visible; }
+
+/* Resolve the state into colours on the slotted children (they can query --state) */
+vaadin-button.activation-button > * {
+  --_bg: var(--ab-bg);
+  --_fg: var(--ab-fg);
+  --_border: var(--ab-border);
+  --_shadow: var(--ab-shadow);
+  color: var(--_fg);
+  transition: color .35s ease;
+}
+@container style(--state: hovered) {
+  vaadin-button.activation-button > * { --_bg: var(--ab-hover-bg); }
+}
+@container style(--state: done) {
+  vaadin-button.activation-button > * {
+    --_bg: var(--ab-done-bg);
+    --_fg: var(--ab-done-fg);
+    --_border: var(--ab-done-border);
+    --_shadow: var(--ab-done-shadow);
+  }
+}
+
+/* Surface */
+vaadin-button.activation-button .ab-fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--ab-radius);
+  background-color: var(--_bg);
+  box-shadow: inset 0 0 0 1px var(--_border), var(--_shadow);
+  transition: background-color .35s ease, box-shadow .35s ease;
+  pointer-events: none;
+}
+
+/* Rolling label: children are resting / working / done, top to bottom */
+vaadin-button.activation-button .ab-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: var(--ab-label-align, flex-start);
+  height: var(--ab-row);
+  line-height: var(--ab-row);
+  overflow: hidden;
+  mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent);
+}
+vaadin-button.activation-button .ab-labels > * {
+  --_i: 0;
+  flex: none;
+  height: var(--ab-row);
+  translate: 0 calc(var(--_i) * var(--ab-row) * -1);
+  transition: translate .55s var(--ab-smooth);
+}
+@container style(--state: working) {
+  vaadin-button.activation-button .ab-labels > * { --_i: 1; transition: translate .4s var(--ab-smooth) .1s; }
+}
+@container style(--state: done) {
+  vaadin-button.activation-button .ab-labels > * { --_i: 2; transition: translate .4s var(--ab-smooth); }
+}
+
+/* =====================================================================
+   ICON: export  (tray + arrow, 24-unit grid, stroke = currentColor)
+   hovered  arrow dips toward the tray
+   working  arrows keep dropping into the tray, the tray takes each one
+   done     the last arrow sinks in, the tray settles, a check pops in
+   reset    the check sinks into the tray, a fresh arrow drops from above
+   ===================================================================== */
+.ab-icon-export {
+  display: inline-block;
+  width: var(--ab-icon-size, 20px);
+  height: var(--ab-icon-size, 20px);
+  flex: none;
+}
+.ab-icon-export svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ab-icon-export path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ab-icon-export :is(.ex-arrow, .ex-check, .ex-tray) {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.ab-icon-export .ex-arrow {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform .5s var(--ab-spring, ease) .12s, opacity .01s;
+}
+.ab-icon-export .ex-check {
+  transform: translateY(18px);
+  opacity: 1;
+  transition: transform .4s cubic-bezier(.5, 0, .9, .5), opacity .2s ease;
+}
+.ab-icon-export .ex-tray { transform: translateY(0); transition: transform .3s ease; }
+
+@container style(--state: hovered) {
+  .ab-icon-export .ex-arrow { transform: translateY(2.5px); transition: transform .35s var(--ab-spring, ease); }
+}
+@container style(--state: working) {
+  .ab-icon-export .ex-arrow {
+    transform: translateY(-18px);
+    animation: ex-drop 1.3s infinite;
+  }
+  .ab-icon-export .ex-tray { animation: ex-catch 1.3s infinite; }
+  .ab-icon-export .ex-check { transform: scale(.4); opacity: 0; transition: none; }
+}
+@container style(--state: done) {
+  .ab-icon-export .ex-arrow {
+    transform: translateY(-18px);
+    opacity: 0;
+    animation: ex-drop 1.3s infinite;      /* keep running so it fades, not snaps */
+    transition: opacity .15s ease;
+  }
+  .ab-icon-export .ex-tray { animation: ex-catch-once .5s ease-out; }
+  .ab-icon-export .ex-check {
+    transform: scale(1);
+    opacity: 1;
+    transition: transform .5s var(--ab-spring, ease) .12s, opacity .2s ease .12s;
+  }
+}
+@keyframes ex-drop {
+  0%     { transform: translateY(0);     animation-timing-function: cubic-bezier(.55, 0, .9, .45); }
+  30%    { transform: translateY(18px); }
+  30.01% { transform: translateY(-18px); animation-timing-function: cubic-bezier(.2, .9, .3, 1.15); }
+  72%    { transform: translateY(0); }
+  100%   { transform: translateY(0); }
+}
+@keyframes ex-catch {
+  0%, 22% { transform: translateY(0); }
+  31%     { transform: translateY(1.6px); }
+  45%, 100% { transform: translateY(0); }
+}
+@keyframes ex-catch-once {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(1.8px); }
+  100% { transform: translateY(0); }
+}
+
+/* =====================================================================
+   ICON: activate  (white disc; arrow → check → spinner ring → check)
+   Ink defaults to the button surface so the glyph reads as a cut-out.
+   ===================================================================== */
+.ab-icon-activate {
+  --icon-ink: var(--ab-bg);
+  --icon-done: var(--ab-done-bg);
+  --icon-fg: var(--ab-fg);
+  display: inline-block;
+  width: var(--ab-icon-size, 40px);
+  height: var(--ab-icon-size, 40px);
+  flex: none;
+}
+.ab-icon-activate svg {
+  display: block; width: 100%; height: 100%; overflow: visible;
+  color: var(--icon-ink);
+  transition: color .4s ease;
+}
+.ab-icon-activate .spin { transform-box: view-box; transform-origin: 50% 50%; }
+.ab-icon-activate .disc {
+  fill: none;
+  stroke: var(--icon-fg);
+  r: 10px;
+  stroke-width: 20px;
+  stroke-dasharray: 100 0;
+  transition: r .4s var(--ab-smooth), stroke-width .4s var(--ab-smooth);
+}
+.ab-icon-activate .glyph {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.ab-icon-activate .arrow { transform: translateY(0); transition: transform .45s var(--ab-spring); }
+.ab-icon-activate .check { transform: translateY(28px); transition: transform .45s var(--ab-spring), opacity .25s ease; }
+@container style(--state: hovered) {
+  .ab-icon-activate .arrow { transform: translateY(-34px); }
+  .ab-icon-activate .check { transform: translateY(0); }
+}
+@container style(--state: working) {
+  .ab-icon-activate .arrow { transform: translateY(-34px); }
+  .ab-icon-activate .check {
+    transform: scale(0);
+    opacity: 0;
+    transition: transform .25s var(--ab-smooth), opacity .2s ease .05s;
+  }
+  .ab-icon-activate .disc {
+    r: 19px;
+    stroke-width: 2px;
+    transition-delay: .15s;
+    animation: act-dash 1.5s ease-in-out .55s infinite;
+  }
+  .ab-icon-activate .spin { animation: act-rotate 1.1s linear .55s infinite; }
+}
+@container style(--state: done) {
+  .ab-icon-activate svg { color: var(--icon-done); }
+  .ab-icon-activate .arrow { transform: translateY(-34px); transition: none; }
+  .ab-icon-activate .check {
+    transform: scale(1);
+    opacity: 1;
+    transition: transform .5s var(--ab-spring) .3s, opacity .3s ease .3s;
+  }
+}
+@keyframes act-rotate { to { transform: rotate(360deg); } }
+@keyframes act-dash {
+  0%   { stroke-dasharray: 96 4;  stroke-dashoffset: 0; }
+  50%  { stroke-dasharray: 22 78; stroke-dashoffset: -38; }
+  100% { stroke-dasharray: 96 4;  stroke-dashoffset: -100; }
+}
+
+/* =====================================================================
+   Reduced motion: keep state changes legible, drop the looping travel
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  vaadin-button.activation-button { --ab-spring: ease; }
+  vaadin-button.activation-button[active] { scale: 1; }
+  @container style(--state: working) {
+    .ab-icon-export .ex-arrow { animation: none; transform: translateY(2.5px); }
+    .ab-icon-export .ex-tray { animation: none; }
+    .ab-icon-activate .spin { animation-duration: 2.4s; }
+    .ab-icon-activate .disc { animation: none; stroke-dasharray: 30 70; }
+  }
+  @container style(--state: done) {
+    .ab-icon-export .ex-arrow { animation: none; }
+    .ab-icon-export .ex-tray { animation: none; }
+  }
+}
