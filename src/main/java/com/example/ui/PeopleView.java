@@ -1,10 +1,8 @@
 package com.example.ui;
 
-import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import com.vaadin.flow.function.SerializableBiConsumer;
 
@@ -20,7 +18,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.card.CardVariant;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H1;
@@ -191,31 +188,18 @@ public class PeopleView extends MasterDetailLayout {
         var copy = new VerticalLayout(titleLine, intro);
         copy.addClassName("directory-copy");
         copy.setPadding(false);
-copy.setSpacing(false);
+        copy.setSpacing(false);
 
         var export = new ActivationButton(ActivationIcon.EXPORT,"Export", "Exporting","Exported");
         export.addClassName("secondary-action");
         export.downloadOnClick(DownloadHandler
         .fromInputStream(event -> {
             byte[] csv = CsvExport.toBytes(PEOPLE, CSV_COLUMNS);
-            return new DownloadResponse(new ByteArrayInputStream(csv),
+            return new DownloadResponse(new SlowByteArrayInputStream(csv, 3),
                     "people-" + LocalDate.now() + ".csv",
                     "text/csv; charset=UTF-8", csv.length);
         })
         .whenStart(export::start)
-        .onProgress(new SerializableBiConsumer<Long, Long>() {
-
-            @Override
-            public void accept(Long t, Long u) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-
-        })
         .whenComplete(export::finish));
 
         var header = new HorizontalLayout(copy, export);
