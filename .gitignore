@@ -1,4 +1,7 @@
 /target/
+/build/
+/bin/
+.gradle/
 .idea/
 .vscode/
 .settings
